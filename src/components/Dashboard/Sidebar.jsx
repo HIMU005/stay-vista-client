@@ -1,19 +1,32 @@
 import { useState } from 'react'
 import { GrLogout } from 'react-icons/gr'
 import { FcSettings } from 'react-icons/fc'
-import { BsFillHouseAddFill, BsGraphUp } from 'react-icons/bs'
-import { Link, NavLink } from 'react-router-dom'
-import { MdHomeWork } from 'react-icons/md'
+import { BsGraphUp } from 'react-icons/bs'
+import { Link } from 'react-router-dom'
 import useAuth from '../../hooks/useAuth'
 import { AiOutlineBars } from 'react-icons/ai'
+import useRole from '../../hooks/useRole'
+import MenuItem from './Menu/MenuItem'
+import HostMenu from './Menu/HostMenu'
+import GuestMenu from './Menu/GeustMenu'
+import AdminMenu from './Menu/AdminMenu'
+import ToggleBtn from '../Shared/Button/ToggleButton'
 
 const Sidebar = () => {
-    const { logOut } = useAuth()
-    const [isActive, setActive] = useState(false)
+    const { logOut } = useAuth();
+    const [isActive, setActive] = useState(false);
+    const [toggle, setToggle] = useState(true);
+    // eslint-disable-next-line no-unused-vars
+    const [role, isLoading] = useRole();
+    // console.log(role, isLoading);
 
     // Sidebar Responsive Handler
     const handleToggle = () => {
         setActive(!isActive)
+    }
+
+    const toggleHandler = e => {
+        setToggle(e.target.checked);
     }
     return (
         <>
@@ -65,45 +78,23 @@ const Sidebar = () => {
                     <div className='flex flex-col justify-between flex-1 mt-6'>
                         {/* Conditional toggle button here.. */}
 
+                        {role === 'host' && < ToggleBtn toggleHandler={toggleHandler} toggle={toggle} />}
+
                         {/*  Menu Items */}
                         <nav>
                             {/* Statistics */}
-                            <NavLink
-                                to='/dashboard' end
-                                className={({ isActive }) =>
-                                    `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${isActive ? 'bg-gray-300  text-gray-700' : 'text-gray-600'
-                                    }`
-                                }
-                            >
-                                <BsGraphUp className='w-5 h-5' />
+                            <MenuItem
+                                ff label='Statistics'
+                                address='/dashboard'
+                                icon={BsGraphUp}
+                            />
+                            {/* role related nav link  */}
+                            {role === 'guest' && <GuestMenu />}
+                            {role === 'host' ? toggle ? <HostMenu /> : <GuestMenu /> : undefined}
 
-                                <span className='mx-4 font-medium'>Statistics</span>
-                            </NavLink>
+                            {role === 'admin' && <AdminMenu />}
 
-                            {/* Add Room */}
-                            <NavLink
-                                to='add-room'
-                                className={({ isActive }) =>
-                                    `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${isActive ? 'bg-gray-300  text-gray-700' : 'text-gray-600'
-                                    }`
-                                }
-                            >
-                                <BsFillHouseAddFill className='w-5 h-5' />
 
-                                <span className='mx-4 font-medium'>Add Room</span>
-                            </NavLink>
-                            {/* My Listing */}
-                            <NavLink
-                                to='my-listings'
-                                className={({ isActive }) =>
-                                    `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${isActive ? 'bg-gray-300  text-gray-700' : 'text-gray-600'
-                                    }`
-                                }
-                            >
-                                <MdHomeWork className='w-5 h-5' />
-
-                                <span className='mx-4 font-medium'>My Listings</span>
-                            </NavLink>
                         </nav>
                     </div>
                 </div>
@@ -112,17 +103,13 @@ const Sidebar = () => {
                     <hr />
 
                     {/* Profile Menu */}
-                    <NavLink
-                        to='/dashboard/profile'
-                        className={({ isActive }) =>
-                            `flex items-center px-4 py-2 my-5  transition-colors duration-300 transform  hover:bg-gray-300   hover:text-gray-700 ${isActive ? 'bg-gray-300  text-gray-700' : 'text-gray-600'
-                            }`
-                        }
-                    >
-                        <FcSettings className='w-5 h-5' />
+                    <MenuItem
+                        label='Profile'
+                        address='/dashboard/profile'
+                        icon={FcSettings}
+                    />
 
-                        <span className='mx-4 font-medium'>Profile</span>
-                    </NavLink>
+
                     <button
                         onClick={logOut}
                         className='flex w-full items-center px-4 py-2 mt-5 text-gray-600 hover:bg-gray-300   hover:text-gray-700 transition-colors duration-300 transform'
