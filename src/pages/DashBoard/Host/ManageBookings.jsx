@@ -1,54 +1,33 @@
 import { Helmet } from 'react-helmet-async'
+import useAuth from '../../../hooks/useAuth'
 import useAxiosSecure from '../../../hooks/useAxiosSecure'
-import { useMutation, useQuery } from '@tanstack/react-query';
-import useAuth from '../../../hooks/useAuth';
-import LoadingSpinner from '../../../components/Shared/LoadingSpinner';
-import RoomDataRow from '../../../components/Dashboard/RoomDataRow';
-import toast from 'react-hot-toast';
+import { useQuery } from '@tanstack/react-query'
+import LoadingSpinner from '../../../components/Shared/LoadingSpinner'
+import BookingDataRow from '../../../components/Dashboard/BookingDataRow'
 
-const MyListings = () => {
-    const axiosSecure = useAxiosSecure();
-    // fetch room data 
-    const { user } = useAuth();
-    const { data: rooms = [], isLoading, refetch } = useQuery({
-        queryKey: ['rooms', user?.email],
+const ManageBookings = () => {
+    const { user } = useAuth()
+    const axiosSecure = useAxiosSecure()
+    //   Fetch Bookings Data
+    const {
+        data: bookings = [],
+        isLoading,
+        refetch,
+    } = useQuery({
+        queryKey: ['my-bookings', user?.email],
         queryFn: async () => {
-            const { data } = await axiosSecure.get(`/my-listings/${user?.email}`)
-            return data;
+            const { data } = await axiosSecure.get(`/manage-bookings/${user?.email}`)
+
+            return data
         },
     })
 
-    // delete 
-    const { mutateAsync } = useMutation({
-        mutationFn: async (id) => {
-            const data = await axiosSecure.delete(`/room/${id}`)
-            return data;
-        },
-        onSuccess: ({ data }) => {
-            if (data.deletedCount) {
-                refetch();
-                toast.success("Post delete successfully ")
-            }
-
-        }
-    })
-
-
-    // handle delete 
-    const handleDelete = async id => {
-        try {
-            await mutateAsync(id);
-        }
-        catch (err) {
-            console.log(err);
-        }
-    }
-
+    console.log(bookings)
     if (isLoading) return <LoadingSpinner />
     return (
         <>
             <Helmet>
-                <title>My Listings</title>
+                <title>Manage Bookings</title>
             </Helmet>
 
             <div className='container mx-auto px-4 sm:px-8'>
@@ -68,7 +47,7 @@ const MyListings = () => {
                                             scope='col'
                                             className='px-5 py-3 bg-white  border-b border-gray-200 text-gray-800  text-left text-sm uppercase font-normal'
                                         >
-                                            Location
+                                            Guest Info
                                         </th>
                                         <th
                                             scope='col'
@@ -92,22 +71,17 @@ const MyListings = () => {
                                             scope='col'
                                             className='px-5 py-3 bg-white  border-b border-gray-200 text-gray-800  text-left text-sm uppercase font-normal'
                                         >
-                                            Delete
-                                        </th>
-                                        <th
-                                            scope='col'
-                                            className='px-5 py-3 bg-white  border-b border-gray-200 text-gray-800  text-left text-sm uppercase font-normal'
-                                        >
-                                            Update
+                                            Action
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody>{/* Room row data */}
-                                    {rooms.map(room => (
-                                        <RoomDataRow
-                                            key={room._id}
-                                            room={room}
-                                            handleDelete={handleDelete}
+                                <tbody>
+                                    {' '}
+                                    {/* Table Row Data */}
+                                    {bookings.map(booking => (
+                                        <BookingDataRow
+                                            key={booking._id}
+                                            booking={booking}
                                             refetch={refetch}
                                         />
                                     ))}
@@ -121,4 +95,4 @@ const MyListings = () => {
     )
 }
 
-export default MyListings
+export default ManageBookings
